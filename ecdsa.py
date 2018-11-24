@@ -2,7 +2,7 @@ from ecutil import inv, curve
 import os
 
 # sizes
-KLEN = 5
+KLEN = 20
 
 # c   : curve 
 # G   : generator
@@ -17,30 +17,29 @@ class Verifier :
   self.pub = pub
   self.hash = hs
 
- def verify(self, m, (R, S)) :  
-  S1 = inv(S, self.curve.p)
+ def verify(self, m, (R, S)):  
+  n = self.curve.n
+  S1 = inv(S, n)
   z = int(self.hash(str(m)).encode('hex'), 16)
-  print(z)
-  P = (S1*(z*self.G + R*self.pub))[0] % self.curve.p
-  print(P)
-  print(R)
-  return P == R  
+  u1 = (S1*z) % n
+  v1 = (S1*R) % n 
+  P = (u1*self.G + v1*self.pub)[0] % n 
+  return (P-R)%n == 0  
 
 class Signer :
  def __init__(self, c, g, pr, hs) :
   self.curve = c
   self.G = c.point(g[0], g[1])
   self.pr = pr
-  self.pub = pr*self.G
+  self.pub = pr*self.G 
   self.hash = hs
 
  def sign(self,m) :
   k = int(os.urandom(KLEN).encode('hex'), 16) 
-  p = self.curve.p
-  R = (k*self.G)[0]
+  n = self.curve.n
+  R = (k*self.G)[0] % n
   z = int(self.hash(str(m)).encode('hex'), 16)
-  print(z)
-  S = (inv(k, p)*( z + self.pr * R )) % p
+  S = (inv(k, n)*( z + self.pr * R )) % n
   return (R,S)
 
  def authorize(self) :

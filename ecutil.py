@@ -16,10 +16,11 @@ def __inv(x, p) :
   return (v1, u1 - (x/p)*v1)
 
 class curve:
- def __init__(self, a, b, p) :
+ def __init__(self, a, b, p, n) :
   self.a = a
   self.b = b
   self.p = p
+  self.n = n
 
  class p_point :
   def __init__(self, x, y, i, a, b, p) :
@@ -99,7 +100,7 @@ class curve:
   return __rmul__(self,p)
 
  def point(self, x, y) :
-  if(y**2 == x**3 + self.a*x + self.b) :
+  if(0 == (x**3 + self.a*x + self.b - y**2) % self.p) :
    return self.p_point(x % self.p, y % self.p, False, self.a, self.b, self.p) 
   else :
    return False
